@@ -1,0 +1,21 @@
+relationship d932ffe8-5283-485b-85e7-fdc205106f13
+	joinOnDateBehavior: datePartOnly
+	fromColumn: d_calendar.Date
+	toColumn: LocalDateTable_34c3a72b-45fa-43fa-9fe4-b5d7c937b415.Date
+
+relationship bbfb1741-22a1-43a5-905e-d0075bf63513
+	fromColumn: f_financials.Date
+	toColumn: d_calendar.Date
+
+relationship b2e8aafd-b683-4e7c-b8b1-13e67d621799
+	fromColumn: f_financials.Product
+	toColumn: d_products.Product
+
+relationship 3dd8e9ab-21fc-4364-8adb-048578085987
+	fromColumn: f_financials_attributes_x.Index
+	toColumn: f_financials.Index
+
+relationship be7d9375-bfe7-429c-b9f2-2ae93f27f157
+	fromColumn: f_financials_attributes_y.Index
+	toColumn: f_financials.Index
+

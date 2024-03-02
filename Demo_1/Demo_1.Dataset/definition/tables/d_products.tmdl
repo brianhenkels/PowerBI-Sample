@@ -1,0 +1,42 @@
+table d_products
+	lineageTag: 68876c3b-aa8f-4679-b76f-63f1a2eba7b2
+
+	column Product
+		dataType: string
+		lineageTag: a83bfe8b-2e20-454f-96ed-997efd31f008
+		summarizeBy: none
+		sourceColumn: Product
+
+		annotation SummarizationSetBy = Automatic
+
+	column Description
+		dataType: string
+		lineageTag: 6de5dd42-9195-4c9b-9b2d-8bd15e68b63e
+		summarizeBy: none
+		sourceColumn: Description
+
+		annotation SummarizationSetBy = Automatic
+
+	column ImageUrl
+		dataType: string
+		lineageTag: 466e334c-a52f-4866-8d05-982d423b6133
+		dataCategory: ImageUrl
+		summarizeBy: none
+		sourceColumn: ImageUrl
+
+		annotation SummarizationSetBy = Automatic
+
+	partition d_products = m
+		mode: import
+		queryGroup: Load
+		source = ```
+				let
+				    Source = m_products
+				in 
+				    Source
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

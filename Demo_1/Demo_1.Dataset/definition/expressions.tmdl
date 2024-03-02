@@ -1,0 +1,167 @@
+expression financials =
+		let
+		 Source = Excel.Workbook(File.Contents("C:\Program Files\Microsoft Power BI Desktop\bin\SampleData\Financial Sample.xlsx"), null, true),
+		    financials_Table = Source{[Item="financials",Kind="Table"]}[Data]
+		in
+		    financials_Table
+	lineageTag: 6864e8aa-53de-4740-823e-3a53feed4e52
+	queryGroup: Extract\Excel
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression m_products =
+		let
+		    dProducts = #table(
+		        { "Product", "Description", "ImageUrl" },
+		        {
+		            {"Paseo", "Bicycle", "https://decathlonpro.vtexassets.com/arquivos/ids/9626656/16494401945232.jpg"},
+		            {"VTT", "Sneaker", ""},
+		            {"Velo", "Ball", ""},
+		            {"Amarilla", "Glass", ""},
+		            {"Montana", "Bag", ""},
+		            {"Carretera", "Skate", "https://decathlonpro.vtexassets.com/arquivos/ids/2355733/yamba-blue-corail-1.jpg"}
+		        }
+		    ),
+		    #"Changed Type" = Table.TransformColumnTypes(dProducts,{{"Product", type text}, {"Description", type text}, {"ImageUrl", type text}})
+		in
+		    #"Changed Type"
+	lineageTag: bc4b2aa6-0a3a-422e-b225-5e57227e3b67
+	queryGroup: Extract\M
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression m_calendar =
+		let
+		    // MinYear = 2013,
+		    // MaxYear = 2014,
+		    Locale = "en-GB",
+		    MinYear = Date.Year(List.Min(financials[Date])),
+		    MaxYear = Date.Year(List.Max(financials[Date])),
+		    BeginDate = #date(MinYear, 1, 1),
+		    EndDate = #date(MaxYear, 12, 31),
+		    DaysBetween = Duration.Days(EndDate - BeginDate) + 1,
+		    DatesList = List.Dates(BeginDate, DaysBetween, #duration(1,0,0,0)),
+		    ConvertedToTable = Table.FromList(DatesList, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+		    RenamedColumns = Table.RenameColumns(ConvertedToTable,{{"Column1", "Date"}}),
+		    ChangedType = Table.TransformColumnTypes(RenamedColumns,{{"Date", type date}}),
+		
+		    Add_Year = Table.AddColumn(ChangedType, "Year", each Date.Year([Date]), Int64.Type),
+		    Add_Month = Table.AddColumn(Add_Year, "Month", each Date.Month([Date]), Int64.Type),
+		    Add_MonthName = Table.AddColumn(Add_Month, "Month Name", each Date.MonthName([Date], Locale), type text),
+		    Add_YearMonthSort = Table.AddColumn(Add_MonthName, "YearMonthSort", each [Year]*100 + [Month], Int64.Type),
+		    Add_Day = Table.AddColumn(Add_YearMonthSort, "Day", each Date.Day([Date]), Int64.Type),
+		    Add_DayOfWeek = Table.AddColumn(Add_Day, "Day of Week", each Date.DayOfWeek([Date]), Int64.Type),
+		    Add_WeekOfYear = Table.AddColumn(Add_DayOfWeek, "Week of Year", each Date.WeekOfYear([Date]), Int64.Type),
+		    Add_DayOfWeekName = Table.AddColumn(Add_WeekOfYear, "Day of Week Name", each Date.DayOfWeekName([Date], Locale), type text),
+		    Add_Semester = Table.AddColumn(Add_DayOfWeekName, "Semester", each if [Month] <= 6 then "S1" else "S2", type text),
+		    Add_Quarter = Table.AddColumn(Add_Semester, "Quarter", each Date.QuarterOfYear([Date]), Int64.Type),
+		    Add_ShortMonth = Table.AddColumn(Add_Quarter, "Short Month", each Text.Start([Month Name], 3), type text),
+		    Add_YearMonth = Table.AddColumn(Add_ShortMonth, "Year-Month", each Text.Combine({Text.From([Year], Locale), "-", Text.Start([Month Name], 3)})),
+		
+		    Add_RelativeToday = Table.AddColumn(Add_YearMonth, "RelativeToday", each
+		            if [Date] < Date.From(DateTime.LocalNow())
+		            then "Past"
+		            else "Future", type text),
+		    Add_DateFilter = Table.AddColumn(Add_RelativeToday, "Date Filter", each
+		            if [Date] = Date.From(DateTime.LocalNow())
+		            then "Today"
+		            else Text.From([Date]), type text),
+		    Add_DiffDaysToday = Table.AddColumn(Add_DateFilter, "DiffDaysToday", each Number.From([Date]) - Number.From(Date.From(DateTime.LocalNow())), Int64.Type),
+		    Add_DayOfWeekShort = Table.AddColumn(Add_DiffDaysToday, "Day Of Week Short", each Text.Proper(Text.Range([Day of Week Name], 0, 3))),
+		    Add_RollingYears = Table.AddColumn(Add_DayOfWeekShort, "Rolling Years", each Date.Year(Date.From(DateTime.LocalNow()))- Date.Year([Date]), Int64.Type),
+		    Add_RollingWeeks = Table.AddColumn(Add_RollingYears, "Rolling Weeks", each Date.WeekOfYear(Date.From(DateTime.LocalNow()))- Date.WeekOfYear([Date]), Int64.Type),
+		    Add_RollingMonths = Table.AddColumn(Add_RollingWeeks, "Rolling Months", each getRollingMonths([Date]), Int64.Type)
+		in
+		    Add_RollingMonths
+	lineageTag: 37c35abd-1101-4289-9934-6b18073baeeb
+	queryGroup: Extract\M
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression m_measures =
+		let
+		    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [hidden = _t]),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"hidden", type text}})
+		in
+		    #"Changed Type"
+	lineageTag: 65165cb5-ab91-4cb7-a9db-9f1eae85164c
+	queryGroup: Extract\M
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression t_financials =
+		let
+		    // Source = Excel.Workbook(File.Contents("C:\Program Files\Microsoft Power BI Desktop\bin\SampleData\Financial Sample.xlsx"), null, true),
+		    // financials_Table = Source{[Item="financials",Kind="Table"]}[Data],
+		    financials_Table = financials,
+		    #"Changed Type" = Table.TransformColumnTypes(financials_Table,{{"Segment", type text}, {"Country", type text}, {"Product", type text}, {"Discount Band", type text}, {"Units Sold", type number}, {"Manufacturing Price", Int64.Type}, {"Sale Price", Int64.Type}, {"Gross Sales", type number}, {"Discounts", type number}, {" Sales", type number}, {"COGS", type number}, {"Profit", type number}, {"Date", type date}, {"Month Number", Int64.Type}, {"Month Name", type text}, {"Year", Int64.Type}}),
+		    #"Added Conditional Column" = Table.AddColumn(#"Changed Type", "Discount Band Sort", each if [Discount Band] = "None" then 0 else if [Discount Band] = "Low" then 1 else if [Discount Band] = "Medium" then 2 else 3, Int64.Type),
+		    #"Removed Columns" = Table.RemoveColumns(#"Added Conditional Column",{"Month Number", "Month Name", "Year"}),
+		    #"Added Index" = Table.AddIndexColumn(#"Removed Columns", "Index", 1, 1, Int64.Type)
+		in
+		 #"Added Index"
+	lineageTag: 4c43f12d-5de5-4e6e-9bc5-a1f68deb3d2b
+	queryGroup: Transform
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression t_financials_attributes =
+		let
+		    Source = t_financials,
+		    #"Removed Other Columns" = Table.SelectColumns(Source,{"Units Sold", "Manufacturing Price", "Sale Price", "Gross Sales", "Discounts", " Sales", "COGS", "Profit", "Index"}),
+		    #"Unpivoted Other Columns" = Table.UnpivotOtherColumns(#"Removed Other Columns", {"Index"}, "Attribute", "Value"),
+		    #"Trimmed Text" = Table.TransformColumns(#"Unpivoted Other Columns",{{"Attribute", Text.Trim, type text}})
+		in
+		    #"Trimmed Text"
+	lineageTag: e9497e3c-8fb6-4c95-ba5c-2d35377bf83a
+	queryGroup: Transform
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
+expression getRollingMonths =
+		(Date as date) as number =>
+		// considerar meses inteiros... contando a partir do dia 1 do mês - mes atual sempre será 0, mes anterior 1 e mes seguinte -1
+		// [YearDiff]*12+[MonthDiff]
+		let
+		    CurrentDate = Date.From(DateTime.FixedLocalNow()),
+		    CurrentMonth = Date.Month(CurrentDate),
+		    CurrentYear = Date.Year(CurrentDate),
+		    Year = Date.Year(Date),
+		    Month = Date.Month(Date),
+		    YearDiff = CurrentYear-Year,
+		    MonthDiff = CurrentMonth-Month,
+		    Result = YearDiff*12+MonthDiff
+		in
+		    Result
+	lineageTag: d2bfecd9-370c-41d0-b28f-d22d818e9247
+	queryGroup: Extract\M
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Function
+
+expression t_calendar =
+		let
+		    Source = m_calendar,
+		    #"Filtered Rows" = Table.SelectRows(Source, each ([Day] = 1)) // database with only 01 dates
+		in
+		    #"Filtered Rows"
+	lineageTag: ab6deb6d-2190-4fac-97dc-226c5efcd7f7
+	queryGroup: Transform
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

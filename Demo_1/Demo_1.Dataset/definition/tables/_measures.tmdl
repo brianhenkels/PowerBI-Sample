@@ -1,0 +1,70 @@
+table _measures
+	lineageTag: a448a99e-d893-4718-a7cd-839b31013141
+
+	measure Sales = SUM(f_financials[ Sales])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: c97dbf18-d5e9-4b3c-a648-5fa2e759381f
+
+	measure 'Units Sold' = SUM(f_financials[Units Sold])
+		formatString: #,0.00
+		lineageTag: fd0c1ecf-c751-4f0d-b236-2f31723eac7e
+
+	measure 'Avg Sales' = AVERAGE( f_financials[ Sales] )
+		lineageTag: 5dbcfcbe-9525-4253-aa25-f06c0cbe4e61
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Discounts' = AVERAGE( f_financials[Discounts Pct] )
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 913fd989-24a8-4806-8495-1f6d2b0cdb6a
+
+	measure 'Last Month Sales' = ```
+			
+			    var __maxDate = MAX(f_financials[Date])
+			    var __result = CALCULATE(
+			        [Sales],
+			        d_calendar[Year] = YEAR(__maxDate) && d_calendar[Month] = MONTH(__maxDate)
+			    )
+			    return __result
+			```
+		lineageTag: 85c4b35c-4339-4193-8e00-13f3e649506a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Prev Month Sales' = ```
+			
+			    var __selectedIndMonth = SELECTEDVALUE(d_calendar[Rolling Months])
+			    var __result = CALCULATE(
+			        [Sales],
+			        FILTER(all(d_calendar), d_calendar[Rolling Months] = (__selectedIndMonth+1) && d_calendar[Month] = SELECTEDVALUE(d_calendar[Month]))
+			    )
+			    return __result
+			```
+		lineageTag: 292a58d7-fac9-4ec6-babc-9fde7535453a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column hidden
+		dataType: string
+		isHidden
+		lineageTag: 96ea7dba-9d08-4675-a72f-28f88a61d8f0
+		summarizeBy: none
+		sourceColumn: hidden
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _measures = m
+		mode: import
+		queryGroup: Load
+		source =
+				let
+				    Source = m_measures
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

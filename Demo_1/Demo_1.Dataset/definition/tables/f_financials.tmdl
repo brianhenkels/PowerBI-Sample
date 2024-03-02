@@ -1,0 +1,168 @@
+table f_financials
+	lineageTag: 15d9062b-11bb-4723-b4d7-cc5a47f1063b
+
+	column Segment
+		dataType: string
+		lineageTag: 3b542193-24f6-4907-8acc-729a6ad3f3a4
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: 8db7b574-cd3b-48bc-8fa2-ffe2d4448381
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product
+		dataType: string
+		lineageTag: 70f8b601-eaca-4386-98a5-b48ecb9bd059
+		summarizeBy: none
+		sourceColumn: Product
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Discount Band'
+		dataType: string
+		lineageTag: 123d3b99-b7a0-4d9f-9ce8-7c3c9ec3986d
+		summarizeBy: none
+		sourceColumn: Discount Band
+		sortByColumn: 'Discount Band Sort'
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Units Sold'
+		dataType: double
+		lineageTag: 3083c892-bbb1-461e-be02-c97a6be1b372
+		summarizeBy: sum
+		sourceColumn: Units Sold
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Manufacturing Price'
+		dataType: int64
+		formatString: 0
+		lineageTag: 4142fd59-2472-4bd0-b91d-e9766bbde202
+		summarizeBy: sum
+		sourceColumn: Manufacturing Price
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Sale Price'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5b12d417-644c-4fc5-8d58-12a6dc87265b
+		summarizeBy: sum
+		sourceColumn: Sale Price
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Gross Sales'
+		dataType: double
+		lineageTag: c93c63ea-42db-44de-9c24-e8a2b8514f6e
+		summarizeBy: sum
+		sourceColumn: Gross Sales
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Discounts
+		dataType: double
+		lineageTag: 44889935-610c-4091-a601-cd7f3e3353eb
+		summarizeBy: sum
+		sourceColumn: Discounts
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ' Sales'
+		dataType: double
+		lineageTag: 772a0341-44e8-4f5d-9eec-8a6832c99a44
+		summarizeBy: sum
+		sourceColumn: " Sales"
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column COGS
+		dataType: double
+		lineageTag: 3e2b1516-25a1-4242-82cd-080e7fce23dd
+		summarizeBy: sum
+		sourceColumn: COGS
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Profit
+		dataType: double
+		lineageTag: bc4bfe44-6c21-418a-b012-886493750400
+		summarizeBy: sum
+		sourceColumn: Profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 9906bf23-0104-4ba6-87b7-58922c2a4669
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Discounts Pct' = DIVIDE( f_financials[Discounts],  f_financials[Gross Sales] )
+		dataType: double
+		formatString: 0%;-0%;0%
+		lineageTag: 7d4479be-1284-4fd4-a53e-a79278c44859
+		summarizeBy: sum
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Discount Band Sort'
+		dataType: int64
+		formatString: 0
+		lineageTag: 0a76787a-7157-4b3b-a4c7-a46c864ce7fb
+		summarizeBy: sum
+		sourceColumn: Discount Band Sort
+
+		annotation SummarizationSetBy = Automatic
+
+	column Index
+		dataType: int64
+		formatString: 0
+		lineageTag: 47c99878-2426-41a7-8e19-1de5e4dcc19a
+		summarizeBy: none
+		sourceColumn: Index
+
+		annotation SummarizationSetBy = Automatic
+
+	partition f_financials = m
+		mode: import
+		queryGroup: Load
+		source =
+				let
+				    Source = t_financials
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

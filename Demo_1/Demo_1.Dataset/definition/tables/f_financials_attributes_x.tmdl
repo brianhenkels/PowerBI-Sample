@@ -1,0 +1,43 @@
+table f_financials_attributes_x
+	lineageTag: c2c12c34-3327-4f09-8d7f-d78e920f4d60
+
+	column Index
+		dataType: int64
+		formatString: 0
+		lineageTag: 9a10b1f4-4daf-4659-9c21-a9a3f6d1d169
+		summarizeBy: none
+		sourceColumn: Index
+
+		annotation SummarizationSetBy = Automatic
+
+	column Attribute
+		dataType: string
+		lineageTag: 28b6e330-cad1-42e7-a447-43ea7486f914
+		summarizeBy: none
+		sourceColumn: Attribute
+
+		annotation SummarizationSetBy = Automatic
+
+	column Value
+		dataType: double
+		lineageTag: da2dcd95-39c9-4ea4-998e-09e38f477cc1
+		summarizeBy: sum
+		sourceColumn: Value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition f_financials_attributes_x = m
+		mode: import
+		queryGroup: Load
+		source =
+				let
+				    Source = t_financials_attributes
+				in
+				    Source
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
