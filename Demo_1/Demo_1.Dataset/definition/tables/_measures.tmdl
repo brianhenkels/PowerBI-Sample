@@ -44,6 +44,42 @@ table _measures
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	measure 'Min X Range' = ```
+			
+			    var minRange = MIN(f_financials_attributes_x[Value])
+			    var fixMinRange = [Max X Range]*0.05
+			    return minRange - fixMinRange
+			```
+		lineageTag: a439f7de-8e8a-4c4a-a946-910ee57294b6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Max X Range' = ```
+			
+			    MAX( f_financials_attributes_x[Value] ) * 1.05
+			```
+		lineageTag: ac3d741b-758f-4cfd-9748-2619e359f543
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Max Y Range' = ```
+			
+			    MAX( f_financials_attributes_y[Value] ) * 1.1
+			```
+		lineageTag: 3c28696f-62fa-43e4-b218-a36d940f6ccc
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Min Y Range' = ```
+			
+			    var minRange = MIN(f_financials_attributes_y[Value])
+			    var fixMinRange = [Max Y Range]*0.1
+			    return minRange - fixMinRange
+			```
+		lineageTag: 0c1084ad-4bf5-4dda-b996-51d9286a17b2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column hidden
 		dataType: string
 		isHidden

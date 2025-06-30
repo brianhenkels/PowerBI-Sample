@@ -28,7 +28,7 @@ queryGroup Load
 
 annotation __PBI_TimeIntelligenceEnabled = 1
 
-annotation PBIDesktopVersion = 2.126.927.0 (24.02)
+annotation PBIDesktopVersion = 2.144.1155.0 (25.06)+46435b07013d2a234d7fd007083a9e70b8e79f1c
 
 annotation PBI_QueryOrder = ["financials","m_products","m_calendar","m_measures","f_financials","f_financials_attributes_x","f_financials_attributes_y","d_calendar","d_products","_measures","t_calendar","t_financials","t_financials_attributes","getRollingMonths"]
 
@@ -42,4 +42,6 @@ ref table _measures
 ref table d_products
 ref table f_financials_attributes_x
 ref table f_financials_attributes_y
+
+ref cultureInfo en-US
 

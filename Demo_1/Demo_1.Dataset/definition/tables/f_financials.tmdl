@@ -127,11 +127,9 @@ table f_financials
 		annotation UnderlyingDateTimeDataType = Date
 
 	column 'Discounts Pct' = DIVIDE( f_financials[Discounts],  f_financials[Gross Sales] )
-		dataType: double
 		formatString: 0%;-0%;0%
 		lineageTag: 7d4479be-1284-4fd4-a53e-a79278c44859
 		summarizeBy: sum
-		isDataTypeInferred
 
 		annotation SummarizationSetBy = Automatic
 
